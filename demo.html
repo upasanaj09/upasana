@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My love</title>
+    <style>
+        body{
+   margin:0;
+   padding:0;
+   font-family: Arial; 
+   display: flex;
+   justify-content: center;
+   height: 100vh;
+   background: linear-gradient(135deg,#f34271,#ef4046);
+   color: #333;
+}
+    #puzzle {
+      width: 300px;
+      height: 300px;
+      margin: 40px auto;
+      position: relative;
+      border: 2px solid #333;
+      display: block;
+    }
+
+    .tile {
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      background-image: url("image/Gemini_Generated_Image_l2c790l2c790l2c7.png");
+      background-size: 300px 300px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .empty {
+      opacity: 0;
+      pointer-events: none;
+    }
+#box{
+    margin: auto;
+    position: relative;
+    height: 80%;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    background: white;
+    padding: 43px 11px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+#ques{
+    font-size: 24px; 
+    font-weight: bold;
+    margin-bottom: 20px;
+    color:#333;
+}
+#ques1{
+    font-size: 24px; 
+    font-weight: bold;
+    margin-bottom: 20px;
+    color:#333;
+}
+
+.btn{
+    display: flex;
+    flex-direction: column ;
+    justify-content: space-around;
+}
+#resultBox {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s ease;
+}
+
+#resultBox.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#resultBox button {
+  padding: 8px 20px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+#yes{
+    background-color: #f86792;
+    color: white;
+    border: 1px solid #333;
+    border-radius: 10px;
+}
+
+    </style>
+</head>
+
+<body>
+    <div id="box">
+        <h3 id="ques">Mi amore,</h3>  
+        <div class="btn">
+            <div id="puzzle"></div>
+            <div id="resultBox" class="hidden">
+            <p id="ques1">...you complete me <br>Will you be my valentine?</p>
+            <button id="yes">Yes</button>
+        </div>
+        </div>
+    </div>
+<script>    
+const puzzle = document.getElementById("puzzle");
+const size = 3;
+const tileSize = 100;
+const btn=document.getElementById("yes");
+const ques=document.getElementById("ques");
+const ques1=document.getElementById("ques1");
+
+let tiles = [];
+let tileElements = [];
+
+// Initialize tiles 0–8
+function initTiles() {
+  for (let i = 0; i < size * size; i++) {
+    tiles.push(i);
+
+    const tile = document.createElement("div");
+    tile.className = "tile";
+
+    const x = (i % size) * tileSize;
+    const y = Math.floor(i / size) * tileSize;
+
+    tile.style.backgroundPosition = `-${x}px -${y}px`;
+
+    puzzle.appendChild(tile);
+    tileElements.push(tile);
+  }
+}
+
+// Position tiles visually
+function updatePositions() {
+  tiles.forEach((value, index) => {
+    const row = Math.floor(index / size);
+    const col = index % size;
+
+    tileElements[value].style.top = row * tileSize + "px";
+    tileElements[value].style.left = col * tileSize + "px";
+
+    if (value === size * size - 1) {
+      tileElements[value].classList.add("empty");
+    } else {
+      tileElements[value].classList.remove("empty");
+    }
+  });
+}
+
+// Move tile
+function moveTile(index) {
+  const emptyIndex = tiles.indexOf(size * size - 1);
+
+  const row = Math.floor(index / size);
+  const col = index % size;
+  const emptyRow = Math.floor(emptyIndex / size);
+  const emptyCol = emptyIndex % size;
+
+  const isAdjacent =
+    (row === emptyRow && Math.abs(col - emptyCol) === 1) ||
+    (col === emptyCol && Math.abs(row - emptyRow) === 1);
+
+  if (!isAdjacent) return;
+
+  [tiles[index], tiles[emptyIndex]] =
+  [tiles[emptyIndex], tiles[index]];
+
+  updatePositions();
+  checkWin();
+}
+
+// Shuffle safely
+function shuffle() {
+  let moves = 10;
+
+  for (let i = 0; i < moves; i++) {
+    const emptyIndex = tiles.indexOf(size * size - 1);
+    const row = Math.floor(emptyIndex / size);
+    const col = emptyIndex % size;
+
+    let possible = [];
+    if (col > 0) possible.push(emptyIndex - 1);
+    if (col < size - 1) possible.push(emptyIndex + 1);
+    if (row > 0) possible.push(emptyIndex - size);
+    if (row < size - 1) possible.push(emptyIndex + size);
+
+    const randomMove = possible[Math.floor(Math.random() * possible.length)];
+    [tiles[emptyIndex], tiles[randomMove]] =
+    [tiles[randomMove], tiles[emptyIndex]];
+  }
+
+  updatePositions();
+}
+
+// Win check
+function checkWin() {
+  const winState = [...Array(size * size).keys()];
+
+  if (JSON.stringify(tiles) === JSON.stringify(winState)) {
+    tileElements[size * size - 1].classList.remove("empty");
+    setTimeout(() => {document.getElementById('resultBox').classList.add("show")}, 400);
+  }
+}
+
+// Click listeners
+puzzle.addEventListener("click", function(e) {
+  const clickedTile = tileElements.indexOf(e.target);
+  if (clickedTile === -1) return;
+
+  const tileIndex = tiles.indexOf(clickedTile);
+  moveTile(tileIndex);
+});
+
+btn.addEventListener("click",()=>{
+    ques.innerHTML="Thank you,baby!";
+    ques1.innerHTML="I love you so much !!!"
+    btn.style.display="none";
+});
+// Start
+initTiles();
+shuffle();
+updatePositions();
+    </script>
+</body>
+
+</html>
